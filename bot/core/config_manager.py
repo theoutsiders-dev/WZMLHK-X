@@ -11,6 +11,7 @@ class Config:
     HELPER_TOKENS = ""
     BOT_MAX_TASKS = 0
     BOT_PM = False
+    PRIVATE_OUTPUT = False
     CMD_SUFFIX = ""
     COLORED_BTNS = False
     DEFAULT_LANG = "en"

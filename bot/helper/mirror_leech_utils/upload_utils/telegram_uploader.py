@@ -132,6 +132,7 @@ class TelegramUploader:
         settings_map = {
             "MEDIA_GROUP": ("_media_group", False),
             "BOT_PM": ("_bot_pm", False),
+            "PRIVATE_OUTPUT": ("_private_output", False),
             "LEECH_PREFIX": ("_lprefix", ""),
             "LEECH_SUFFIX": ("_lsuffix", ""),
             "LEECH_CAPTION": ("_lcaption", ""),
@@ -448,7 +449,7 @@ class TelegramUploader:
 
     async def _copy_media(self):
         try:
-            if self._bot_pm:
+            if self._bot_pm or self._private_output:
                 await TgClient.bot.copy_message(
                     chat_id=self._listener.user_id,
                     from_chat_id=self._sent_msg.chat.id,
@@ -457,6 +458,18 @@ class TelegramUploader:
                         self._listener.pm_msg.id if self._listener.pm_msg else None
                     ),
                 )
+                if (
+                    self._private_output
+                    and self._sent_msg.chat.id == self._listener.message.chat.id
+                    and not self._is_private
+                ):
+                    try:
+                        await TgClient.bot.delete_messages(
+                            chat_id=self._sent_msg.chat.id,
+                            message_ids=self._sent_msg.id,
+                        )
+                    except Exception:
+                        pass
         except Exception as err:
             if not self._listener.is_cancelled:
                 LOGGER.error(f"Failed To Send in BotPM:\n{str(err)}")

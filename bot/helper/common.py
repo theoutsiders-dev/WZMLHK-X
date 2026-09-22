@@ -153,6 +153,9 @@ class TaskConfig:
         ]
         self.source_url = None
         self.bot_pm = Config.BOT_PM or self.user_dict.get("BOT_PM")
+        self.private_output = Config.PRIVATE_OUTPUT or self.user_dict.get(
+            "PRIVATE_OUTPUT"
+        )
         self.pm_msg = None
         self.file_details = {}
         self.mode = tuple()

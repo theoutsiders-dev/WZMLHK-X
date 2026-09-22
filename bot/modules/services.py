@@ -91,7 +91,7 @@ async def start(_, message):
             cmd=BotCommands.HelpCommand[0],
         )
         await send_message(message, start_string, reply_markup)
-    elif Config.BOT_PM:
+    elif Config.BOT_PM or Config.PRIVATE_OUTPUT:
         await send_message(
             message,
             "<i>Now, Bot will send you all your files and links here. Start Using Now...</i>",
