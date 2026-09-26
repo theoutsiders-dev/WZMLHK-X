@@ -322,6 +322,7 @@ async def update_status_message(sid, force=False):
             sid, is_user, page_no, status, page_step
         )
         if text is None:
+            await delete_message(status_dict[sid]["message"])
             del status_dict[sid]
             if obj := intervals["status"].get(sid):
                 obj.cancel()
@@ -360,6 +361,7 @@ async def send_status_message(msg, user_id=0):
                 sid, is_user, page_no, status, page_step
             )
             if text is None:
+                await delete_message(status_dict[sid]["message"])
                 del status_dict[sid]
                 if obj := intervals["status"].get(sid):
                     obj.cancel()
