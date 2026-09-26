@@ -132,7 +132,6 @@ class TelegramUploader:
         settings_map = {
             "MEDIA_GROUP": ("_media_group", False),
             "BOT_PM": ("_bot_pm", False),
-            "PRIVATE_OUTPUT": ("_private_output", False),
             "LEECH_PREFIX": ("_lprefix", ""),
             "LEECH_SUFFIX": ("_lsuffix", ""),
             "LEECH_CAPTION": ("_lcaption", ""),
@@ -200,31 +199,6 @@ class TelegramUploader:
                 await self._listener.on_upload_error(str(e))
                 return False
 
-        elif (self._bot_pm or self._private_output) and self._listener.is_super_chat:
-            if Config.LEECH_DUMP_CHAT:
-                try:
-                    msg_link = self._listener.message.link
-                    msg = f"""➲ <b><u>Leech Started :</u></b>
-┃
-┠ <b>User :</b> {self._listener.user.mention} ( #ID{self._listener.user_id} )\n┠ <b>Message Link :</b> <a href='{msg_link}'>Click Here</a>
-┖ <b>Source :</b> <a href='{self._listener.source_url}'>Click Here</a>"""
-                    self._log_msg = await TgClient.bot.send_message(
-                        chat_id=int(Config.LEECH_DUMP_CHAT),
-                        text=msg,
-                        disable_web_page_preview=True,
-                        disable_notification=True,
-                    )
-                    self._sent_msg = self._log_msg
-                    if self._user_session:
-                        self._sent_msg = await TgClient.user.get_messages(
-                            chat_id=self._sent_msg.chat.id,
-                            message_ids=self._sent_msg.id,
-                        )
-                except Exception as e:
-                    LOGGER.error(f"Failed to send leech start to LEECH_DUMP_CHAT: {e}")
-                    self._sent_msg = self._listener.message
-            else:
-                self._sent_msg = self._listener.message
         elif self._user_session:
             self._sent_msg = await TgClient.user.get_messages(
                 chat_id=self._listener.message.chat.id, message_ids=self._listener.mid
@@ -474,9 +448,7 @@ class TelegramUploader:
 
     async def _copy_media(self):
         try:
-            if (
-                self._bot_pm or self._private_output
-            ) and self._sent_msg.chat.id != self._listener.user_id:
+            if self._bot_pm:
                 await TgClient.bot.copy_message(
                     chat_id=self._listener.user_id,
                     from_chat_id=self._sent_msg.chat.id,

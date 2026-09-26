@@ -102,11 +102,7 @@ class TaskListener(TaskConfig):
     async def on_download_start(self):
         self.download_start_time = time()
         mode_name = "Leech" if self.is_leech else "Mirror"
-        if (
-            (self.bot_pm or self.private_output)
-            and self.is_super_chat
-            and not self.is_leech
-        ):
+        if self.bot_pm and self.is_super_chat:
             self.pm_msg = await send_message(
                 self.user_id,
                 f"""➲ <b><u>Task Started :</u></b>
@@ -541,25 +537,17 @@ class TaskListener(TaskConfig):
                 msg += f"\n┠ <b>Corrupted Files</b> → {mime_type}"
             msg += f"\n┖ <b>Task By</b> → {self.tag}\n\n"
 
-            if self.bot_pm or self.private_output:
+            if self.bot_pm:
                 pmsg = msg
                 # pmsg += "〶 <b><u>Action Performed :</u></b>\n"
                 # pmsg += "⋗ <i>File(s) have been sent to User PM</i>\n\n"
                 if self.is_super_chat:
-                    pm_button = ButtonMaker()
-                    pm_button.url_button(
-                        "📥 View in Bot PM", f"https://t.me/{TgClient.BNAME}"
-                    )
-                    await send_message(self.message, pmsg, pm_button.build_menu(1))
+                    await send_message(self.message, pmsg)
 
             if not files and not self.is_super_chat:
                 await send_message(self.message, msg)
             else:
-                log_chat = (
-                    self.user_id
-                    if ((self.bot_pm or self.private_output) and self.is_super_chat)
-                    else self.message
-                )
+                log_chat = self.user_id if self.bot_pm else self.message
                 msg += "〶 <b><u>Files List :</u></b>\n"
                 fmsg = ""
                 for index, (link, name) in enumerate(files.items(), start=1):
@@ -663,21 +651,13 @@ class TaskListener(TaskConfig):
                 group_msg += multi_link_msg + "\n"
                 msg += multi_link_msg + "\n"
 
-            if (self.bot_pm or self.private_output) and self.is_super_chat:
+            if self.bot_pm and self.is_super_chat:
                 await send_message(self.user_id, msg, button)
 
             if hasattr(Config, "MIRROR_LOG_ID") and Config.MIRROR_LOG_ID:
                 await send_message(Config.MIRROR_LOG_ID, msg, button)
 
-            if (self.bot_pm or self.private_output) and self.is_super_chat:
-                pm_button = ButtonMaker()
-                pm_button.url_button(
-                    "📥 View in Bot PM", f"https://t.me/{TgClient.BNAME}"
-                )
-                group_btn = pm_button.build_menu(1)
-            else:
-                group_btn = button
-            await send_message(self.message, group_msg, group_btn)
+            await send_message(self.message, group_msg, button)
         if self.seed:
             await clean_target(self.up_dir)
             async with queue_dict_lock:
@@ -697,7 +677,7 @@ class TaskListener(TaskConfig):
         if count == 0:
             await self.clean()
         else:
-            await update_status_message(self.message.chat.id, force=True)
+            await update_status_message(self.message.chat.id)
 
         async with queue_dict_lock:
             if self.mid in non_queued_up:

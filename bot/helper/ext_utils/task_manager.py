@@ -378,12 +378,7 @@ async def pre_task_check(message):
             _msg, button = await forcesub(message, ids, button)
             if _msg:
                 msg.append(_msg)
-        if (
-            Config.BOT_PM
-            or user_dict.get("BOT_PM")
-            or Config.PRIVATE_OUTPUT
-            or user_dict.get("PRIVATE_OUTPUT")
-        ):
+        if Config.BOT_PM or user_dict.get("BOT_PM"):  # or config_dict['SAFE_MODE']:
             _msg, button = await check_botpm(message, button)
             if _msg:
                 msg.append(_msg)
