@@ -102,7 +102,7 @@ class TaskListener(TaskConfig):
     async def on_download_start(self):
         self.download_start_time = time()
         mode_name = "Leech" if self.is_leech else "Mirror"
-        if self.bot_pm and self.is_super_chat:
+        if (self.bot_pm or self.private_output) and self.is_super_chat:
             self.pm_msg = await send_message(
                 self.user_id,
                 f"""➲ <b><u>Task Started :</u></b>
@@ -553,7 +553,7 @@ class TaskListener(TaskConfig):
             else:
                 log_chat = (
                     self.user_id
-                    if (self.bot_pm or self.private_output)
+                    if ((self.bot_pm or self.private_output) and self.is_super_chat)
                     else self.message
                 )
                 msg += "〶 <b><u>Files List :</u></b>\n"
