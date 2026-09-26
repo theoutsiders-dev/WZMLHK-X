@@ -102,7 +102,11 @@ class TaskListener(TaskConfig):
     async def on_download_start(self):
         self.download_start_time = time()
         mode_name = "Leech" if self.is_leech else "Mirror"
-        if (self.bot_pm or self.private_output) and self.is_super_chat:
+        if (
+            (self.bot_pm or self.private_output)
+            and self.is_super_chat
+            and not self.is_leech
+        ):
             self.pm_msg = await send_message(
                 self.user_id,
                 f"""➲ <b><u>Task Started :</u></b>
@@ -693,7 +697,7 @@ class TaskListener(TaskConfig):
         if count == 0:
             await self.clean()
         else:
-            await update_status_message(self.message.chat.id)
+            await update_status_message(self.message.chat.id, force=True)
 
         async with queue_dict_lock:
             if self.mid in non_queued_up:

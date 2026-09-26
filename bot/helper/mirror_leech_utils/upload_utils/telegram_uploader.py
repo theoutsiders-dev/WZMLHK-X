@@ -226,14 +226,7 @@ class TelegramUploader:
             elif self._listener.pm_msg:
                 self._sent_msg = self._listener.pm_msg
             else:
-                try:
-                    self._sent_msg = await TgClient.bot.send_message(
-                        chat_id=self._listener.user_id,
-                        text="➲ <b><u>Leech Started</u></b>",
-                    )
-                except Exception as e:
-                    LOGGER.error(f"Failed to send leech start to user PM: {e}")
-                    self._sent_msg = self._listener.message
+                self._sent_msg = self._listener.message
         elif self._user_session:
             self._sent_msg = await TgClient.user.get_messages(
                 chat_id=self._listener.message.chat.id, message_ids=self._listener.mid
